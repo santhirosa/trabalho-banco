@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+
+// declaracao das structs usadas //
+typedef struct
+    {
+        char nome[80];
+        char cpf[20];
+        char senha[40];
+        char codigo[10];
+        double saldo;
+    } t_cliente;
+
+// declaracao das funcoes usadas //
+int menu_1(void);
+int realiza_cadastro(t_cliente*);
+
+// funcao para escolher entrar/cadastrar-se //
+int menu_1()
+{
+    int flag=1;
+    char word[5];
+
+    printf("==============================\n");
+    printf("1. Entrar\n");
+    printf("2. Cadastrar-se\n");
+    printf("==============================\n");
+
+    while(flag)
+    {
+        printf("Selecione a opcao desejada: ");
+        fgets(word, 5, stdin);
+
+        switch(word[0])
+        case '1' ... '2' : flag=0;
+
+        if(strlen(word) != 2) flag=1;
+
+        if(flag) printf("Opcao invalida.\n");
+    }
+
+    return atoi(word);
+}
+
+// funcao para CADASTRAR-SE, devolve a qtd de clientes ja cadastrados //
+int realiza_cadastro(cliente)
+t_cliente *cliente;
+{
+    static int i=0;
+    FILE *fp;
+    srand(time(NULL));
+    int flag=1, flag_t=0;
+    char cpf[20], senha[40];
+    char cod_tmp[10], ver_cod[80];
+    double temporaria;
+
+    // pegar os dados do novo cliente //
+    printf("Bem vindo ao SuperBank!\n");
+    printf("Digite seu nome completo: ");
+    fgets(cliente->nome, 80, stdin);
+    while(flag)
+    {
+        printf("Digite seu CPF: ");
+        fgets(cpf, 20, stdin);
+
+        for(int k=0;k+1<strlen(cpf);k++)
+        {
+            switch(cpf[k])
+            case '0' ... '9' : flag_t=1;
+            if(flag_t == 1)
+            {
+                flag_t=0;
+                flag=0;
+                continue;
+            }
+            else
+            {
+                flag=1;
+                break;
+            };
+        }
+        if(strlen(cpf) != 12) flag=1;
+
+        if(flag) printf("CPF invalido.\n");
+    }
+    strcpy(cliente->cpf, cpf);
+    while(1)
+    {
+        printf("Digite uma senha para sua conta (max. 30 caracteres): ");
+        fgets(senha,40,stdin);
+        if(strlen(senha)>31)
+        {
+            printf("Senha invalida.\n");
+            continue;
+        }
+        else
+        {
+            strcpy(cliente->senha, senha);
+            break;
+        }
+    }
+    cliente->saldo=0.0;
+
+    printf("Sua conta foi criada com sucesso!\n");
+
+    // criar um codigo para a nova conta //
+    flag=1;
+    while(flag)
+    {
+        flag_t=1;
+
+        cod_tmp[0] = ((rand()%26)+97);
+        cod_tmp[1] = ((rand()%26)+97);
+        cod_tmp[2] = ((rand()%26)+97);
+        cod_tmp[3] = ((rand()%10)+48);
+        cod_tmp[4] = ((rand()%10)+48);
+        cod_tmp[5] = '\0';
+
+        fp = fopen("arq_principal.txt", "rt"); // conferir se o codigo ja existe //
+        for(int k=0;k<i;k++)
+        {
+            fscanf(fp,"%s\n",ver_cod);
+            fscanf(fp,"%s\n",ver_cod);
+            fscanf(fp,"%s\n",ver_cod);
+
+            if(!strcmp(ver_cod,cod_tmp))
+            {
+                flag_t=0;
+                break;
+            }
+
+            fscanf(fp,"%s\n",ver_cod);
+            fscanf(fp,"%lf\n",&temporaria);
+        }
+        fclose(fp);
+
+            if(flag_t)
+            {
+                strcpy(cliente->codigo,cod_tmp);
+                flag=0;
+            }
+    }
+
+    printf("O codigo da sua conta e %s.\n", cliente->codigo);
+    printf("Anote este codigo, pois e com ele que voce tera acesso a sua conta!\n");
+
+    i++;
+    return i;
+}
+
+// funcao para salvar os novos clientes na base de dados do banco //
+void salva_principal(cliente)
+t_cliente *cliente;
+{
+    FILE *fp;
+    fp=fopen("arq_principal.txt", "a");
+    fprintf(fp,"%s",cliente->nome);
+    fprintf(fp,"%s",cliente->cpf);
+    fprintf(fp,"%s\n",cliente->codigo);
+    fprintf(fp,"%s",cliente->senha);
+    fprintf(fp,"%lf\n",cliente->saldo);
+
+    fclose(fp);
+}
+
+int main()
+{
+    // variaveis de acesso restrito ao banco //
+    int retorno=0;
+    t_cliente logado;
+
+    // apresenta o menu inicial //
+    retorno = menu_1();
+    if(retorno == 1)
+    {
+
+    }
+    if(retorno == 2)
+    {
+            realiza_cadastro(&logado);
+            salva_principal(&logado);
+    }
+
+    return 0;
+}
