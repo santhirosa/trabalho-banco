@@ -23,6 +23,8 @@ int realiza_cadastro(t_cliente*);
 void salva_principal(t_cliente*, int);
 t_cliente* login(t_cliente*, int);
 int encontra_conta(char*, t_cliente*, int);
+void realiza_saque(t_cliente*);
+void realiza_deposito(t_cliente*);
 
 // funcao para escolher entrar/cadastrar-se //
 int menu_1()
@@ -271,7 +273,53 @@ int qtd_clientes;
     return -1;
 }
 
+// realizar um saque //
+void realiza_saque(logado)
+t_cliente* logado;
+{
+    int flag=1;
+    char tmp_char[80];
+    double tmp_lf;
 
+    printf("Qual o valor a ser sacado? ");
+    while(flag)
+    {
+        fgets(tmp_char,80,stdin);
+        tmp_lf = atof(tmp_char);
+
+        if(logado->saldo > tmp_lf)
+        {
+            logado->saldo-=tmp_lf;
+            printf("Saque realizado com sucesso.\n");
+            printf("Seu saldo atual e de %.2lf\n", logado->saldo);
+            flag=0;
+        }
+        else
+        {
+            printf("Nao e possivel sacar essa quantia.\n");
+            printf("Seu saldo atual e de %.2lf\n", logado->saldo);
+            printf("Deseja inserir outro valor (s/n)? ");
+            fgets(tmp_char,5,stdin);
+            if(tmp_char[0] == 's') continue;
+            else flag=0;
+        }
+    }
+}
+
+// realizar um deposito //
+void realiza_deposito(logado)
+t_cliente *logado;
+{
+    char tmp_char[80];
+    double tmp_lf;
+
+    printf("Qual o valor a ser depositado? ");
+    fgets(tmp_char,80,stdin);
+    tmp_lf = atof(tmp_char);
+    logado->saldo+=tmp_lf;
+    printf("Deposito realizado com sucesso.\n");
+    printf("Seu saldo atual e de %.2lf\n", logado->saldo);
+}
 
 int main()
 {
@@ -280,8 +328,6 @@ int main()
     int continuar_1=0;
     t_cliente *lista, *logado;
     lista = (t_cliente*)calloc(sizeof(t_cliente),NUM_CLIENTES);
-    char tmp_char[80];
-    double tmp_lf;
 
     while(continuar)
     {
@@ -304,7 +350,7 @@ int main()
             retorno = menu_2();
             if(retorno == 1)        // Saldo //
             {
-                printf("Seu saldo atual: %lf.\n", logado->saldo);
+                printf("Seu saldo atual: %.2lf.\n", logado->saldo);
             }
             if(retorno == 2)        // Extrato //
             {
@@ -316,39 +362,11 @@ int main()
             }
             if(retorno == 4)        // Saque //
             {
-                int flag=1;
-                printf("Qual o valor a ser sacado? ");
-                while(flag)
-                {
-                    fgets(tmp_char,80,stdin);
-                    tmp_lf = atof(tmp_char);
-
-                    if(logado->saldo > tmp_lf)
-                    {
-                        logado->saldo-=tmp_lf;
-                        printf("Saque realizado com sucesso.\n");
-                        printf("Seu saldo atual e de %lf\n", logado->saldo);
-                        flag=0;
-                    }
-                    else
-                    {
-                        printf("Nao e possivel sacar essa quantia.\n");
-                        printf("Seu saldo atual e de %lf\n", logado->saldo);
-                        printf("Deseja inserir outro valor (s/n)? ");
-                        fgets(tmp_char,5,stdin);
-                        if(tmp_char[0] == 's') continue;
-                        else flag=0;
-                    }
-                }
+                realiza_saque(logado);
             }
             if(retorno == 5)        // Deposito //
             {
-                printf("Qual o valor a ser depositado? ");
-                fgets(tmp_char,80,stdin);
-                tmp_lf = atof(tmp_char);
-                logado->saldo+=tmp_lf;
-                printf("Deposito realizado com sucesso.\n");
-                printf("Seu saldo atual e de %lf\n", logado->saldo);
+                realiza_deposito(logado);
             }
             if(retorno == 6)        // Sair da conta //
             {
