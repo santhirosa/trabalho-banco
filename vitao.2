@@ -1,0 +1,194 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+
+#define NUM_CLIENTES 10
+
+// declaracao das structs usadas //
+typedef struct
+    {
+        char nome[80];
+        char cpf[20];
+        char senha[40];
+        char codigo[10];
+        double saldo;
+    } t_cliente;
+
+// declaracao das funcoes usadas //
+int menu_1(void);
+int realiza_cadastro(t_cliente*);
+void salva_principal(t_cliente*);
+
+// funcao para escolher entrar/cadastrar-se //
+int menu_1()
+{
+    int flag=1;
+    char word[5];
+
+    printf("==============================\n");
+    printf("1. Entrar\n");
+    printf("2. Cadastrar-se\n");
+    printf("3. Sair\n");
+    printf("==============================\n");
+
+    while(flag)
+    {
+        printf("Selecione a opcao desejada: ");
+        fgets(word, 5, stdin);
+
+        switch(word[0])
+        case '1' ... '3' : flag=0;
+
+        if(strlen(word) != 2) flag=1;
+
+        if(flag) printf("Opcao invalida.\n");
+    }
+
+    return atoi(word);
+}
+
+// funcao para CADASTRAR-SE, devolve a qtd de clientes ja cadastrados //
+int realiza_cadastro(cliente)
+t_cliente *cliente;
+{
+    static int i=0;
+    srand(time(NULL));
+    int flag=1, flag_t=0;
+    char cpf[20], senha[40];
+    char cod_tmp[10];
+
+    // pegar os dados do novo cliente //
+    printf("Bem vindo ao SuperBank!\n");
+    printf("Digite seu nome completo: ");
+    fgets(cliente[i].nome, 80, stdin);
+    while(flag)
+    {
+        printf("Digite seu CPF: ");
+        fgets(cpf, 20, stdin);
+
+        for(int k=0;k+1<strlen(cpf);k++)
+        {
+            switch(cpf[k])
+            case '0' ... '9' : flag_t=1;
+            if(flag_t == 1)
+            {
+                flag_t=0;
+                flag=0;
+                continue;
+            }
+            else
+            {
+                flag=1;
+                break;
+            };
+        }
+        if(strlen(cpf) != 12) flag=1;
+
+        if(flag) printf("CPF invalido.\n");
+    }
+    strcpy(cliente[i].cpf, cpf);
+    while(1)
+    {
+        printf("Digite uma senha para sua conta (max. 30 caracteres): ");
+        fgets(senha,40,stdin);
+        if(strlen(senha)>31)
+        {
+            printf("Senha invalida.\n");
+            continue;
+        }
+        else
+        {
+            strcpy(cliente[i].senha, senha);
+            break;
+        }
+    }
+    cliente[i].saldo=0.0;
+
+    printf("Sua conta foi criada com sucesso!\n");
+
+    // criar um codigo para a nova conta //
+    flag=1;
+    while(flag)
+    {
+        flag_t=1;
+
+        cod_tmp[0] = ((rand()%26)+97);
+        cod_tmp[1] = ((rand()%26)+97);
+        cod_tmp[2] = ((rand()%26)+97);
+        cod_tmp[3] = ((rand()%10)+48);
+        cod_tmp[4] = ((rand()%10)+48);
+        cod_tmp[5] = '\0';
+
+        // conferir se o codigo ja existe //
+        flag_t=1;
+        for(int k=0;k<i;k++)
+        {
+            if(!strcmp(cod_tmp,cliente[k].codigo))
+            {
+                flag_t=0;
+                break;
+            }
+        }
+
+            if(flag_t)
+            {
+                strcpy(cliente[i].codigo,cod_tmp);
+                flag=0;
+            }
+    }
+
+    printf("O codigo da sua conta e %s.\n", cliente[i].codigo);
+    printf("Anote este codigo, pois e com ele que voce tera acesso a sua conta!\n");
+
+    i++;
+    return i;
+}
+
+// funcao para salvar os novos clientes na base de dados do banco //
+void salva_principal(cliente)
+t_cliente *cliente;
+{
+    int static j=0;
+    FILE *fp;
+    if(j==0)
+        fp=fopen("arq_principal.txt", "wt");
+    else
+        fp=fopen("arq_principal.txt", "a");
+
+    fprintf(fp,"%s",cliente->nome);
+    fprintf(fp,"%s",cliente->cpf);
+    fprintf(fp,"%s\n",cliente->codigo);
+    fprintf(fp,"%s",cliente->senha);
+    fprintf(fp,"%lf\n",cliente->saldo);
+
+    fclose(fp);
+    j++;
+}
+
+int main()
+{
+    // variaveis de acesso restrito ao banco //
+    int retorno=0, continuar=1, cont=0;
+    t_cliente *lista, logado;
+    lista = (t_cliente*)calloc(sizeof(t_cliente),NUM_CLIENTES);
+
+    while(continuar)
+    {
+        // apresenta o menu inicial //
+        retorno = menu_1();
+        if(retorno == 1)
+        {
+
+        }
+        if(retorno == 2)
+        {
+            cont=realiza_cadastro(lista);
+            salva_principal(&lista[cont-1]);
+        }
+        if(retorno == 3) exit(-1);
+    }
+
+    return 0;
+}
