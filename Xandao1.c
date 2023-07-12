@@ -23,7 +23,7 @@ int realiza_cadastro(t_cliente*);
 void salva_principal(t_cliente*, int);
 t_cliente* login(t_cliente*, int);
 int encontra_conta(char*, t_cliente*, int);
-void atualizar_arquivo(t_cliente*,int);
+void atualizar_arquivo(t_cliente*,t_cliente*,int);
 void realiza_saque(t_cliente*);
 void realiza_deposito(t_cliente*);
 void realizar_pix(t_cliente*,t_cliente*,int);
@@ -277,8 +277,8 @@ int qtd_clientes;
 
 //funcao para atualizar o arquivo com novos dados//
 
-void atualizar_arquivo(cliente,contador)
-t_cliente *cliente; int contador;
+void atualizar_arquivo(logado,cliente,contador)
+t_cliente *logado,*cliente; int contador;
 {
     int j;
     FILE *fp;
@@ -286,6 +286,10 @@ t_cliente *cliente; int contador;
     if(fp==NULL) printf("\nNao foi possivel salvar as alteracoes[erro de abrtura do arquivo]");
     else 
     {
+        for(j=0;j<contador;j++)
+        {
+            if(!strcmp(logado->codigo,cliente[j].codigo)) cliente[j]=*logado;
+        }
         for(j=0;j<contador;j++)
         {
             fprintf(fp,"%s",cliente[j].nome);
@@ -450,17 +454,17 @@ int main()
             if(retorno == 3)        // PIX //
             {
                 realizar_pix(logado,lista,cont);
-                atualizar_arquivo(lista,cont);
+                atualizar_arquivo(logado,lista,cont);
             }
             if(retorno == 4)        // Saque //
             {
                 realiza_saque(logado);
-                atualizar_arquivo(lista,cont);
+                atualizar_arquivo(logado,lista,cont);
             }
             if(retorno == 5)        // Deposito //
             {
                 realiza_deposito(logado);
-                atualizar_arquivo(lista,cont);
+                atualizar_arquivo(logado,lista,cont);
             }
             if(retorno == 6)        // Sair da conta //
             {
