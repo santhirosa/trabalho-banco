@@ -17,7 +17,7 @@ typedef struct
         double saldo;
     } t_cliente;
 
-// declaracao das funcoes usadas //
+// declaracao das funcoes e subrotinas usadas //
 void cls(HANDLE);
 void pausa(void);
 int menu_1(void);
@@ -25,11 +25,13 @@ int menu_2(void);
 int realiza_cadastro(t_cliente*);
 void salva_principal(t_cliente*, int);
 t_cliente* login(t_cliente*, int);
-int encontra_conta(char*, t_cliente*, int);
+int encontra_conta_cod(char*, t_cliente*, int);
+int encontra_conta_cpf(char*, t_cliente*, int);
 void realiza_saque(t_cliente*);
 void realiza_deposito(t_cliente*);
+void realiza_pix(t_cliente*, t_cliente*, int);
 
-// funcao para limpar tela (criada pelo FOsorio) //
+// subrotina para limpar tela (criada pelo FOsorio) //
 void cls(HANDLE hConsole)
 {
     COORD coordScreen = { 0, 0 };    // home for the cursor
@@ -75,7 +77,7 @@ void cls(HANDLE hConsole)
     SetConsoleCursorPosition(hConsole, coordScreen);
 }
 
-// funcao para pausar o programa por um instante //
+// subrotina para pausar o programa por um instante //
 void pausa()
 {
     char plvr[5];
@@ -112,7 +114,7 @@ int menu_1()
     return atoi(word);
 }
 
-// menu da conta //
+// funcao para o menu da conta //
 int menu_2()
 {
     int flag=1;
@@ -252,7 +254,7 @@ t_cliente *cliente;
     return i;
 }
 
-// funcao para salvar os novos clientes na base de dados do banco //
+// subrotina para salvar os novos clientes na base de dados do banco //
 void salva_principal(cliente, qtd_clientes)
 t_cliente *cliente;
 int qtd_clientes;
@@ -285,7 +287,7 @@ int qtd_clientes;
         k = (strlen(cod_tmp)-1);
         if(cod_tmp[k]=='\n') cod_tmp[k]='\0';
 
-        ind_tmp = encontra_conta(cod_tmp, cliente, qtd_clientes);
+        ind_tmp = encontra_conta_cod(cod_tmp, cliente, qtd_clientes);
         if(ind_tmp == -1)
         {
             printf("Conta nao encontrada.\n");
@@ -319,8 +321,8 @@ int qtd_clientes;
     return &cliente[ind_tmp];
 }
 
-// funcao para encontrar uma conta //
-int encontra_conta(codigo, cliente, qtd_clientes)
+// funcao para encontrar uma conta pelo codigo //
+int encontra_conta_cod(codigo, cliente, qtd_clientes)
 char codigo[10];
 t_cliente* cliente;
 int qtd_clientes;
@@ -337,7 +339,25 @@ int qtd_clientes;
     return -1;
 }
 
-// realizar um saque //
+// funcao para encontrar uma conta pelo CPF //
+int encontra_conta_cpf(cpf, cliente, qtd_clientes)
+char cpf[20];
+t_cliente* cliente;
+int qtd_clientes;
+{
+    for(int i=0;i<qtd_clientes;i++)
+        {
+            if(!strcmp(cpf,cliente[i].cpf))
+            {
+                return i;
+            }
+            if(i == qtd_clientes-1)
+                break;
+        }
+    return -1;
+}
+
+// subrotina para realizar um saque //
 void realiza_saque(logado)
 t_cliente* logado;
 {
@@ -351,7 +371,7 @@ t_cliente* logado;
         fgets(tmp_char,80,stdin);
         tmp_lf = atof(tmp_char);
 
-        if(logado->saldo > tmp_lf)
+        if(logado->saldo >= tmp_lf)
         {
             printf("Digite sua senha para confirmar: ");
             int flag_1=1;
@@ -388,7 +408,7 @@ t_cliente* logado;
     }
 }
 
-// realizar um deposito //
+// subrotina para realizar um deposito //
 void realiza_deposito(logado)
 t_cliente *logado;
 {
@@ -405,6 +425,82 @@ t_cliente *logado;
     pausa();
     cls(GetStdHandle(STD_OUTPUT_HANDLE));
 }
+
+// subrotina para realizar um PIX //
+void realiza_pix(logado, cliente, qtd_clientes)
+t_cliente *logado, *cliente;
+int qtd_clientes;
+{
+    char cpf[20], tmp_char[80];
+    int indice, flag=1, k=0;
+    double tmp_lf;
+
+    printf("Digite a chave CPF para a qual deseja fazer o pix: ");
+    while(flag)
+    {
+        fgets(cpf,20,stdin);
+        k = (strlen(cpf)-1);
+        if(cpf[k]=='\n') cpf[k]='\0';
+
+        indice = encontra_conta_cpf(cpf, cliente, qtd_clientes);
+        if(indice == -1)
+        {
+            printf("Conta nao encontrada.\n");
+            printf("Digite novamente: ");
+        }
+        else
+        {
+            flag=0;
+        }
+    }
+
+    flag=1;
+    printf("Digite o valor do PIX: ");
+    while(flag)
+    {
+        fgets(tmp_char,80,stdin);
+        tmp_lf = atof(tmp_char);
+
+        if(logado->saldo >= tmp_lf && tmp_lf>0.0)
+        {
+            printf("Digite sua senha para confirmar: ");
+            int flag_1=1;
+            while(flag_1)
+            {
+                fgets(tmp_char,80,stdin);
+                tmp_char[strlen(tmp_char)-1]='\0';
+                if(!strcmp(tmp_char,logado->senha))
+                {
+                    logado->saldo-=tmp_lf;
+                    cliente[indice].saldo+=tmp_lf;
+
+                    printf("PIX efetuado com sucesso.\n");
+                    flag_1=0;
+                }
+                else
+                {
+                    printf("Senha incorreta, digite novamente.\n");
+                }
+            }
+
+            printf("Seu saldo atual e de %.2lf\n", logado->saldo);
+            flag=0;
+            pausa();
+        }
+        else
+        {
+            printf("Nao e possivel enviar essa quantia.\n");
+            printf("Seu saldo atual e de %.2lf\n", logado->saldo);
+            printf("Deseja inserir outro valor (s/n)? ");
+            fgets(tmp_char,5,stdin);
+            if(tmp_char[0] == 's') continue;
+            else flag=0;
+        }
+        cls(GetStdHandle(STD_OUTPUT_HANDLE));
+    }
+
+}
+
 
 int main()
 {
@@ -444,7 +540,7 @@ int main()
             }
             if(retorno == 3)        // PIX //
             {
-
+                realiza_pix(logado, lista, cont);
             }
             if(retorno == 4)        // Saque //
             {
