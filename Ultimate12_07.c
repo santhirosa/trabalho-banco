@@ -298,6 +298,9 @@ t_cliente *cliente;
     FILE *fp;
     int i; 
     char tmp_char[80];
+    fp=fopen("arq_principal.txt", "at");
+    fclose(fp);
+
     fp=fopen("arq_principal.txt", "rt");
     if(fp==NULL)
     {
