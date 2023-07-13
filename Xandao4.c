@@ -410,13 +410,13 @@ char cpf[20];
 t_cliente* cliente;
 int qtd_clientes;
 {
-    for(int i=0;i<qtd_clientes;i++)
+    for(int i=0;i<NUM_CLIENTES;i++)
         {
             if(!strcmp(cpf,cliente[i].cpf))
             {
                 return i;
             }
-            if(i == qtd_clientes-1)
+            if(i == NUM_CLIENTES-1)
                 break;
         }
     return -1;
