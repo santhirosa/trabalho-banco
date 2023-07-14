@@ -6,7 +6,7 @@
 #include <time.h>
 #include <windows.h>
 
-#define DEBUGAR 1
+#define DEBUGAR 0
 
 #define NUM_CLIENTES 30
 #define TAXA_POUPANCA 0.06 // taxa da poupanca por ano//
