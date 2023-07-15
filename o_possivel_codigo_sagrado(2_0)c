@@ -715,7 +715,7 @@ int qtd_clientes;
     }
     for(i=0;i<qtd_clientes;i++)
     {
-        if(cliente[i].codigo!='\0')
+        if(cliente[i].codigo[0]!='\0')
         {
             fprintf(fp,"%s\n",cliente[i].codigo);
             fprintf(fp,"%lf\n",cliente[i].poupanca.total);
